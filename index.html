@@ -196,8 +196,19 @@
     font-size:10px; padding:3px 7px; cursor:pointer; border-radius:3px;
     opacity:0; transition:opacity .15s;
     z-index:10; font-weight:bold;
+    pointer-events:none;
   }
-  .editable:hover .edit-btn{ opacity:1; }
+  body.edit-mode .edit-btn{ pointer-events:auto; }
+  body.edit-mode .editable:hover .edit-btn{ opacity:1; }
+  body.edit-mode .editable:hover{ outline: 1px dashed var(--azul); outline-offset: 2px; }
+  .edit-mode-banner{
+    position:fixed; top:0; left:0; right:0; z-index:200;
+    background:var(--azul); color:#fff; text-align:center;
+    font-size:13px; font-weight:bold; padding:6px; letter-spacing:.5px;
+    display:none;
+  }
+  body.edit-mode .edit-mode-banner{ display:block; }
+  body.edit-mode{ padding-top:34px; }
 
   .toolbar{
     max-width:1300px; margin:0 auto 16px; display:flex; justify-content:flex-end; gap:10px;
@@ -241,9 +252,10 @@
 </head>
 <body>
 
+<div class="edit-mode-banner">MODO DE EDIÇÃO ATIVADO — pressione "E" novamente para sair</div>
 <div class="toolbar">
   <button class="secondary" onclick="resetData()">Restaurar layout original</button>
-  <button onclick="alert('Passe o mouse sobre cada matéria e clique no botão azul \'Editar\' para trocar o texto, título ou imagem.')">Como editar?</button>
+  <button onclick="alert('Pressione a tecla \'E\' do teclado para ativar o modo de edição. Com o modo ativado, passe o mouse sobre cada matéria e clique no botão azul \'Editar\' para trocar o texto, título ou imagem. Pressione \'E\' novamente (ou Esc) para sair do modo de edição.')">Como editar?</button>
 </div>
 
 <div class="wrap">
@@ -468,6 +480,19 @@ function resetData(){
 
 document.getElementById('overlay').addEventListener('click', e=>{
   if(e.target.id === 'overlay') closeEditor();
+});
+
+document.addEventListener('keydown', e=>{
+  const tag = (e.target.tagName || '').toLowerCase();
+  const isTyping = tag === 'input' || tag === 'textarea' || e.target.isContentEditable;
+  if(isTyping) return;
+  if(e.key === 'e' || e.key === 'E'){
+    document.body.classList.toggle('edit-mode');
+  }
+  if(e.key === 'Escape'){
+    document.body.classList.remove('edit-mode');
+    closeEditor();
+  }
 });
 
 loadData();
